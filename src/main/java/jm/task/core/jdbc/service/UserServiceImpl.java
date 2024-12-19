@@ -9,10 +9,9 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
-    UserDao dao;
+    private final UserDao dao = new UserDaoJDBCImpl();
 
     public UserServiceImpl() {
-        dao = new UserDaoJDBCImpl();
     }
 
     @Override

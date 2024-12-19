@@ -7,111 +7,95 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
-
 public class UserDaoJDBCImpl implements UserDao {
 
-    // конструктор пустой (условие в задании), хотя можно было бы и по другому
+    private final static String CREAT_TABLE_SQL = """ 
+            CREATE TABLE IF NOT EXISTS `mydb`.`users` (
+              `id` INT NOT NULL AUTO_INCREMENT,
+              `firstName` VARCHAR(45) NOT NULL,
+              `lastName` VARCHAR(45) NOT NULL,
+              `age` INT(3) UNSIGNED NOT NULL,
+              PRIMARY KEY (`id`),
+              UNIQUE INDEX `idnew_table_UNIQUE` (`id` ASC) VISIBLE)
+            ENGINE = InnoDB
+            DEFAULT CHARACTER SET = utf8;
+            """;
+
+    private final Connection connection = Util.getConnection();
+
+
     public UserDaoJDBCImpl() {
     }
 
-    // создать таблицу если она еще не создана, если создана то ничего не делать
     @Override
     public void createUsersTable() {
-        // описание запроса на создание таблицы
-        String creatTableSQL = """ 
-                CREATE TABLE IF NOT EXISTS `mydb`.`users` (
-                  `id` INT NOT NULL AUTO_INCREMENT,
-                  `firstName` VARCHAR(45) NOT NULL,
-                  `lastName` VARCHAR(45) NOT NULL,
-                  `age` INT(3) UNSIGNED NOT NULL,
-                  PRIMARY KEY (`id`),
-                  UNIQUE INDEX `idnew_table_UNIQUE` (`id` ASC) VISIBLE)
-                ENGINE = InnoDB
-                DEFAULT CHARACTER SET = utf8;
-                """;
 
-        try (Connection connectUtil = Util.getConnection()) {
-            Statement statement = connectUtil.createStatement();
-            // запрос на создание таблицы к базе данных
-            statement.execute(creatTableSQL);
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute(CREAT_TABLE_SQL);
         } catch (SQLException e) {
             System.out.printf("Ошибка при создании новой таблицы.\n%s.", e.getMessage());
         }
-
-
     }
 
-    // удаление таблицы если она существует иначе ничего не делать
     @Override
     public void dropUsersTable() {
-        // запрос на удаление таблицы
-        String deleteTableSQL = "DROP TABLE IF EXISTS mydb.users;";
 
-        try (Connection connectUtil = Util.getConnection()) {
-
-            Statement statement = connectUtil.createStatement();
-
-            // запрос на удаление таблицы
-            statement.execute(deleteTableSQL);
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute("DROP TABLE IF EXISTS mydb.users;");
 
         } catch (SQLException e) {
             System.out.printf("Ошибка при удалении таблицы из БД.\n%s.", e.getMessage());
         }
     }
 
-    // добавление строки в таблицу
     @Override
     public void saveUser(String name, String lastName, byte age) {
 
-        try (Connection connectUtil = Util.getConnection()) {
-            Statement statement = connectUtil.createStatement();
-            String sql = format("INSERT INTO Users (firstName, lastName, age) VALUES ('%s', '%s', %d);",
-                    name, lastName, (int) age);
-            // запрос на добавление новой строки
-            statement.executeUpdate(sql);
+        try {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("INSERT INTO mydb.users (firstName, lastName, age) VALUES (?, ?, ?);");
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, age);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.printf("Ошибка при добавлении новой строки в таблицу.\n%s.", e.getMessage());
         }
     }
 
-    // удаление строки из таблицы по id
     @Override
     public void removeUserById(long id) {
 
-        try (Connection connectUtil = Util.getConnection()) {
-            Statement statement = connectUtil.createStatement();
-            String str = format("DELETE FROM `users` WHERE `id` = %d;", id);
-            // запрос на удаление пользователя
-            statement.executeUpdate(str);
+        try {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("DELETE FROM mydb.users WHERE id = ?;");
+            preparedStatement.setInt(1,(int) id);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.printf("Ошибка при удалении строки из таблицы.\n%s.", e.getMessage());
         }
     }
 
-    // Удалить все строки в таблице
     @Override
     public void cleanUsersTable() {
-        String strCleanUsers = "TRUNCATE TABLE mydb.users;";
 
-        try (Connection connectUtil = Util.getConnection()) {
-            Statement statement = connectUtil.createStatement();
-            // запрос на очистку всей таблицы
-            statement.execute(strCleanUsers);
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute("TRUNCATE TABLE mydb.users;");
         } catch (SQLException e) {
             System.out.printf("Ошибка при очистке таблицы.\n%s.", e.getMessage());
         }
     }
 
-    // вывести список всех User в List<User>
     @Override
     public List<User> getAllUsers() {
         List<User> usersMas = new ArrayList<>();
-        String sql = "SELECT * FROM mydb.users";
 
-        try (Connection connectUtil = Util.getConnection()) {
-            Statement statement = connectUtil.createStatement();
-            ResultSet rs = statement.executeQuery(sql);
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM mydb.users");
             while (rs.next()) {
                 User userEl = new User();
                 userEl.setId(rs.getLong("id"));
