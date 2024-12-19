@@ -1,0 +1,18 @@
+# Запрс на создание таблицы users
+CREATE TABLE IF NOT EXISTS `mydb`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `firstName` VARCHAR(45) NOT NULL,
+  `lastName` VARCHAR(45) NOT NULL,
+  `age` INT(3) UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idnew_table_UNIQUE` (`id` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+# Удаление таблицы если она существует
+DROP TABLE IF EXISTS mydb.users;
+
+# Добавление нового пользователя
+INSERT INTO Users (firstName, lastName, age)
+VALUES ('Aleksei', 'Fefelov', 56);
