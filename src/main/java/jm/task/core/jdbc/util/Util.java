@@ -16,7 +16,7 @@ public class Util {
     public static Connection getConnection()  {
 
         try {
-            Driver driver = new Driver();
+//            Driver driver = new Driver();
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
             System.out.printf("Ошибка при подключении к БД.\n%s.", e.getMessage());

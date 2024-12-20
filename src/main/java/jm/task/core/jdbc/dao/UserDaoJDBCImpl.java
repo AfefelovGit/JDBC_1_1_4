@@ -30,8 +30,7 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void createUsersTable() {
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             statement.execute(CREAT_TABLE_SQL);
         } catch (SQLException e) {
             System.out.printf("Ошибка при создании новой таблицы.\n%s.", e.getMessage());
@@ -41,10 +40,8 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void dropUsersTable() {
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             statement.execute("DROP TABLE IF EXISTS mydb.users;");
-
         } catch (SQLException e) {
             System.out.printf("Ошибка при удалении таблицы из БД.\n%s.", e.getMessage());
         }
@@ -53,9 +50,8 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void saveUser(String name, String lastName, byte age) {
 
-        try {
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("INSERT INTO mydb.users (firstName, lastName, age) VALUES (?, ?, ?);");
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement("INSERT INTO mydb.users (firstName, lastName, age) VALUES (?, ?, ?);")) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, age);
@@ -68,9 +64,8 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void removeUserById(long id) {
 
-        try {
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("DELETE FROM mydb.users WHERE id = ?;");
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement("DELETE FROM mydb.users WHERE id = ?")) {
             preparedStatement.setInt(1,(int) id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -81,8 +76,7 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void cleanUsersTable() {
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             statement.execute("TRUNCATE TABLE mydb.users;");
         } catch (SQLException e) {
             System.out.printf("Ошибка при очистке таблицы.\n%s.", e.getMessage());
@@ -93,8 +87,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> usersMas = new ArrayList<>();
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery("SELECT * FROM mydb.users");
             while (rs.next()) {
                 User userEl = new User();
